@@ -20,3 +20,11 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
+"""
+Division:
+usuarios: Usuarios e Inquilinos.
+Operaciones: Apartamentos, contratos, mantenimientos.
+Finanza: pagos, gastos, gastos_apartamentos.
+"""
