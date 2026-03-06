@@ -1,33 +1,63 @@
 from django.db import models
 
-# Create your models here.
 
-class pagos(models.Model):
-    pagoId = models.AutoField()
-    contratoId = models.ForeignKey('operaciones.contratos', on_delete=models.CASCADE, null=True)
-    metodo = models.CharField(null=False, max_length=20, choices=[('efectivo'),('tarjeta'),('transferencia'),], default='efectivo')
-    montoTotal = models.DecimalField(null=False, max_digits=10, decimal_places=2)
-    periodo = models.CharField(null=False, max_length=20)
-    estado = models.CharField(null=False, max_length=20, choices=[('pendiente'),('pagado'),('atrasado'),], default='pendiente')
+class Pago(models.Model):
+    METODO = [
+        ('efectivo', 'Efectivo'),
+        ('tarjeta', 'Tarjeta'),
+        ('transferencia', 'Transferencia'),
+    ]
+    ESTADO = [
+        ('pendiente', 'Pendiente'),
+        ('pagado', 'Pagado'),
+        ('atrasado', 'Atrasado'),
+    ]
+    pagoId = models.AutoField(primary_key=True)
+    contrato = models.ForeignKey(
+        'operaciones.Contrato',
+        on_delete=models.CASCADE,
+        related_name='pagos'
+    )
+    metodo = models.CharField(max_length=20, choices=METODO, default='efectivo')
+    montoTotal = models.DecimalField(max_digits=10, decimal_places=2)
+    periodo = models.CharField(max_length=20)
+    estado = models.CharField(max_length=20, choices=ESTADO, default='pendiente')
     def __str__(self):
-        return f'Pago: {self.pagoId} | Contrato: {self.periodo} | Monto: {self.montoTotal} | Estado: {self.estado}'
-    
-class gastos(models.Model):
-    gastoId = models.AutoField()
-    descripcion = models.TextField(null=False)
+        return f'Pago {self.pagoId} | {self.montoTotal} | {self.estado} | {self.periodo}'
+
+
+class Gasto(models.Model):
+    ESTADO = [
+        ('pendiente', 'Pendiente'),
+        ('pagado', 'Pagado'),
+        ('atrasado', 'Atrasado'),
+    ]
+    gastoId = models.AutoField(primary_key=True)
+    descripcion = models.TextField()
     fecha = models.DateField(auto_now_add=True)
-    coste = models.DecimalField(null=False, max_digits=10, decimal_places=2)
-    periodo = models.CharField(null=False, max_length=20)
-    estado = models.CharField(null=False, max_length=20, choices=[('pendiente'),('pagado'),('atrasado'),], default='pendiente')
+    coste = models.DecimalField(max_digits=10, decimal_places=2)
+    periodo = models.CharField(max_length=20)
+    estado = models.CharField(max_length=20, choices=ESTADO, default='pendiente')
     def __str__(self):
-        return f'Gasto: {self.descripcion} | Monto: {self.coste} | Fecha: {self.fecha}'
-    
-class gastos_apartamento(models.Model):
-    gastos_apartamentoId = models.AutoField()
-    gastoId = models.ForeignKey('gastos', on_delete=models.CASCADE, null=True)
-    apartamentoId = models.ForeignKey('operaciones.apartamentos', on_delete=models.CASCADE, null=True)
-    monto_asignado = models.DecimalField(null=False, max_digits=10, decimal_places=2)
-    coste = models.DecimalField(null=False, max_digits=10, decimal_places=2)
-    pagoEstado = models.CharField(null=False, max_length=20, choices=[('pendiente'),('pagado'),('atrasado'),], default='pendiente')
+        return f'{self.descripcion} | {self.coste}'
+
+
+class GastoApartamento(models.Model):
+    ESTADO = [
+        ('pendiente', 'Pendiente'),
+        ('pagado', 'Pagado'),
+        ('atrasado', 'Atrasado'),
+    ]
+    gastoApartamentoId = models.AutoField(primary_key=True)
+    gasto = models.ForeignKey(
+        'finanza.Gasto',
+        on_delete=models.CASCADE
+    )
+    apartamento = models.ForeignKey(
+        'operaciones.Apartamento',
+        on_delete=models.CASCADE
+    )
+    monto_asignado = models.DecimalField(max_digits=10, decimal_places=2)
+    pagoEstado = models.CharField(max_length=20, choices=ESTADO, default='pendiente')
     def __str__(self):
-        return f'Gasto: {self.gastoId} | Apartamento: {self.apartamentoId} | Monto Asignado: {self.monto_asignado} | Pago Estado: {self.pagoEstado}'
+        return f'{self.gasto} | {self.apartamento}'
